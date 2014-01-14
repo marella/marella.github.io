@@ -1,1 +1,225 @@
-GoDB
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>GoDB</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A simple key-value store server written in Go language">
+
+    <!-- Le styles -->
+    <link href="http://code.pirob.com/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 20px;
+        padding-bottom: 60px;
+      }
+
+      /* Custom container */
+      .container {
+        margin: 0 auto;
+        max-width: 1000px;
+      }
+
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        margin: 80px 0;
+        text-align: center;
+      }
+      .jumbotron h1 {
+        font-size: 100px;
+        line-height: 1;
+      }
+      .jumbotron .lead {
+        font-size: 24px;
+        line-height: 1.25;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+
+      /* Supporting marketing content */
+      .marketing {
+        margin: 60px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+
+
+      /* Customize the navbar links to be fill the entire space of the .navbar */
+      .navbar .navbar-inner {
+        padding: 0;
+      }
+      .navbar .nav {
+        margin: 0;
+        display: table;
+        width: 100%;
+      }
+      .navbar .nav li {
+        display: table-cell;
+        width: 1%;
+        float: none;
+      }
+      .navbar .nav li a {
+        font-weight: bold;
+        text-align: center;
+        border-left: 1px solid rgba(255,255,255,.75);
+        border-right: 1px solid rgba(0,0,0,.1);
+      }
+      .navbar .nav li:first-child a {
+        border-left: 0;
+        border-radius: 3px 0 0 3px;
+      }
+      .navbar .nav li:last-child a {
+        border-right: 0;
+        border-radius: 0 3px 3px 0;
+      }
+    </style>
+
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="masthead">
+        <h3 class="muted">GoDB</h3>
+        <div class="navbar">
+          <div class="navbar-inner">
+            <div class="container">
+              <ul class="nav">
+                <li><a target="_blank" href="https://github.com/marella/godb">Source</a></li>
+                <li><a href="#install">Install</a></li>
+                <li><a href="#documentation">Documentation</a></li>
+                <li><a href="#commands">Commands</a></li>
+                <li><a href="#rules">Rules</a></li>
+              </ul>
+            </div>
+          </div>
+        </div><!-- /.navbar -->
+      </div>
+
+      <!-- Jumbotron -->
+      <div class="jumbotron">
+        <h1>GoDB</h1>
+        <p class="lead">A simple key-value store server written in Go language.</p>
+        <a class="btn btn-large btn-success" href="#documentation">Read Documentation</a>
+      </div>
+
+      <hr>
+
+      <!-- Example row of columns -->
+      <!--
+      <div class="row-fluid">
+        <div class="span4">
+          <h2>Heading</h2>
+          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+        </div>
+        <div class="span4">
+          <h2>Heading</h2>
+          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+       </div>
+        <div class="span4">
+          <h2>Heading</h2>
+          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa.</p>
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+        </div>
+      </div>
+
+      <hr>-->
+
+	<h3 id="install">Installation and Setup</h3>
+	<p>This project is hosted on Github.com and the source code can be downloaded from <a href="https://github.com/marella/godb">https://github.com/marella/godb</a>. You need to have Go language installed to run this project.</p>
+<pre>
+go get github.com/marella/godb
+cd GOPATH/github.com/marella/godb
+go build
+godb # if on windows run godb.exe to start server
+client\client # in another command window run client\client.exe to open client
+# now enter different commands in client window
+# you can also club many commands into one separated by ';'
+</pre>
+	
+	<hr>
+
+	<h3 id="documentation">Documentation</h3>
+	<ul>
+    <li><i>server.go</i> creates the GoDB server and <i>client/client.go</i> is the client that can communicate with the server</li>
+    <li><code>map[string]string</code> is used to store the key-values, that is, keys and values will be of string type</li>
+		<li>GoDB server listens for tcp connections on port 2000 (you can change it using GODB_PORT and should also be changed in <i>godb/godb.go</i>)</li>
+		<li>You can use any language to open a socket and connect to the server and can run queries</li>
+    <li>Write a command to the socket and read the response to complete the execution of a query</li>
+    <li>A small library file <i>godb.go</i> is provided for Go language under the <i>godb</i> folder which can be used to create your own client easily</li>
+    <li>Repeat this for all queries and when you close the connection the key-values entered till now will be saved to the disk into a file "db.txt"</li>
+    <li>GoDB loads the key-values from the disk when the server is started and retains it in memory (also saves to disk when a connection closes)</li>
+	</ul>
+	
+	<hr>
+
+  <h3 id="commands">List of Commands</h3>
+  <p>Many commands can be clubbed together, separated by <code>;</code> and can be run as a complex query. This query will be broken down into individual commands at the server and runs the commands one by one and then ouputs all the responses separated by <code>;</code>. This helps in reducing the round trips between server and client. If an error occurs with a query then the execution is stopped there.</p>
+	<table class="table">
+		<thead><tr><th>Command</th><th>Parameters Count</th><th>Parameters</th><th>Return value</th><th>Description</th><th>Example Query</th></tr></thead>
+		<tbody>
+			<tr>
+				<td><code>COPY</code></td><td>2</td><td><i>source, destination</i></td><td>OK (or)<br>error: &lt;key&gt; not set</td>
+				<td>Copy value of source key to destination key</td>
+				<td><code>copy a b</code></td>
+			</tr>
+			<tr>
+				<td><code>DEL</code></td><td>1</td><td><i>key</i></td><td>OK</td>
+				<td>Delete a key</td>
+				<td><code>del a</code></td>
+			</tr>
+			<tr>
+				<td><code>GET</code></td><td>1</td><td><i>key</i></td><td>return: &lt;value&gt; (or)<br>error: &lt;key&gt; not set</td>
+				<td>Get the value of a key</td>
+				<td><code>get a</code></td>
+			</tr>
+			<tr>
+				<td><code>QUIT</code></td><td>0</td><td><i></i></td><td>connection closing</td>
+				<td>Close the connection</td>
+				<td><code>quit</code></td>
+			</tr>
+			<tr>
+				<td><code>RENAME</code></td><td>2</td><td><i>key, newkey</i></td><td>OK (or)<br>error: &lt;key&gt; not set</td>
+				<td>Rename a key</td>
+				<td><code>rename a b</code></td>
+			</tr>
+			<tr>
+				<td><code>SET</code></td><td>2</td><td><i>key, value</i></td><td>OK</td>
+				<td>Set the string value of a key</td>
+				<td><code>set a hello world</code></td>
+			</tr>
+		</tbody>
+	</table>
+
+	<hr>
+
+	<h3 id="rules">Rules and Guidelines</h3>
+
+	<ul>
+		<li>A query should be in a single line only</li>
+		<li>Multiple spaces in a query will be treated as a single space</li>
+		<li>Supplying extra parameters will not give any error and extra parameters will be silently ignored</li>
+    <li>In case of <code>SET</code>, only first two spaces are used as parameter separators and remaining spaces are treated to be part of the string value</li>
+		<li>Do not use quotes, especially in the <code>SET</code> command, do not enclose value with quotes</li>
+		<li>Any quotes present in the query will be treated as part of the parameter and will be added to the database as part of the string</li>
+		<li>Keys can not contain spaces</li>
+    <li>A command cannot contain semicolons <code>;</code> as it is used as a delimiter for commands in a complex query</li>
+	</ul>
+
+      <hr>
+
+      <div class="footer">
+        <p>By Ravindra Marella</p>
+      </div>
+
+    </div> <!-- /container -->
+
+  </body>
+</html>
