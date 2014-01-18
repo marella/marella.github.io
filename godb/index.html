@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -144,7 +143,7 @@ client\client.exe # in another command window run client\client.exe to open clie
     <li>A client connects to the server creating a TCP connection to the port 2000</li>
     <li>Write a command to the socket and read the response to complete the execution of a query</li>
     <li>A header byte is appended to the start of each data string which specifies the additional number of times client/server has to read using a buffer of 512 bytes to get full data</li>
-    <li>Header of 0 value indicates that it there is no need read further</li>
+    <li>Header of 0 value indicates that it there is no need to read further</li>
     <li>Default buffer size is <em>512</em>, so client needs to specify the number of bytes (number of times of 512) it is sending, as the first byte along with the command</li>
     <li>All responses from the server have their starting byte set to number of bytes (number of times of 512) of response</li>
   </ul>
