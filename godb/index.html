@@ -93,6 +93,7 @@
                 <li><a target="_blank" href="https://github.com/marella/godb">Source</a></li>
                 <li><a href="#install">Install</a></li>
                 <li><a href="#documentation">Documentation</a></li>
+                <li><a href="#protocol">Protocol</a></li>
                 <li><a href="#commands">Commands</a></li>
                 <li><a href="#rules">Rules</a></li>
               </ul>
@@ -110,36 +111,14 @@
 
       <hr>
 
-      <!-- Example row of columns -->
-      <!--
-      <div class="row-fluid">
-        <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn" href="#">View details &raquo;</a></p>
-        </div>
-        <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn" href="#">View details &raquo;</a></p>
-       </div>
-        <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa.</p>
-          <p><a class="btn" href="#">View details &raquo;</a></p>
-        </div>
-      </div>
-
-      <hr>-->
-
 	<h3 id="install">Installation and Setup</h3>
 	<p>This project is hosted on Github.com and the source code can be downloaded from <a href="https://github.com/marella/godb">https://github.com/marella/godb</a>. You need to have Go language installed to run this project.</p>
 <pre>
 go get github.com/marella/godb
 cd GOPATH/github.com/marella/godb
 go build
-godb # if on windows run godb.exe to start server
-client\client # in another command window run client\client.exe to open client
+godb.exe # if on windows run godb.exe to start server
+client\client.exe # in another command window run client\client.exe to open client
 # now enter different commands in client window
 # you can also club many commands into one separated by ';'
 </pre>
@@ -150,14 +129,39 @@ client\client # in another command window run client\client.exe to open client
 	<ul>
     <li><i>server.go</i> creates the GoDB server and <i>client/client.go</i> is the client that can communicate with the server</li>
     <li><code>map[string]string</code> is used to store the key-values, that is, keys and values will be of string type</li>
-		<li>GoDB server listens for tcp connections on port 2000 (you can change it using GODB_PORT and should also be changed in <i>godb/godb.go</i>)</li>
+		<li>GoDB server listens for tcp connections on port 2000 (you can change it using GODB_PORT in <i>server.go</i> and <i>godb/godb.go</i>)</li>
 		<li>You can use any language to open a socket and connect to the server and can run queries</li>
-    <li>Write a command to the socket and read the response to complete the execution of a query</li>
     <li>A small library file <i>godb.go</i> is provided for Go language under the <i>godb</i> folder which can be used to create your own client easily</li>
     <li>Repeat this for all queries and when you close the connection the key-values entered till now will be saved to the disk into a file "db.txt"</li>
     <li>GoDB loads the key-values from the disk when the server is started and retains it in memory (also saves to disk when a connection closes)</li>
 	</ul>
 	
+  <hr>
+
+  <h3 id="protocol">Protocol</h3>
+  <h4>Client</h4>
+  <ul>
+    <li>A client connects to the server creating a TCP connection to the port 2000</li>
+    <li>Write a command to the socket and read the response to complete the execution of a query</li>
+    <li>A header byte is appended to the start of each data string which specifies the additional number of times client/server has to read using a buffer of 512 bytes to get full data</li>
+    <li>Header of 0 value indicates that it there is no need read further</li>
+    <li>Default buffer size is <em>512</em>, so client needs to specify the number of bytes (number of times of 512) it is sending, as the first byte along with the command</li>
+    <li>All responses from the server have their starting byte set to number of bytes (number of times of 512) of response</li>
+  </ul>
+  <h4>Response codes</h4>
+  <table class="table">
+    <thead><tr><th>Response code</th><th>Description</th><th>Example Response</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td> - </td><td>0</td></tr>
+      <tr><td>1</td><td>Success</td><td>1</td></tr>
+      <tr><td>R</td><td>Output/Return value</td><td>Rhello...</td></tr>
+      <tr><td>-X</td><td>Error. X is the error code</td><td>-C</td></tr>
+      <tr><td>-C</td><td>Error: Command not found</td><td>-C</td></tr>
+      <tr><td>-A</td><td>Error: Insufficient arguments</td><td>-A</td></tr>
+      <tr><td>-K</td><td>Error: Key not set</td><td>-K</td></tr>
+    </tbody>
+  </table>
+
 	<hr>
 
   <h3 id="commands">List of Commands</h3>
