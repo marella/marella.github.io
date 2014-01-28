@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>cluster - Ravindra Marella</title>
+		<link type="text/css" rel="stylesheet" href="http://golang.org/lib/godoc/style.css">
+	</head>
+	<body>
+		<div id="page" class="wide">
+			<div class="container">
+				<h1>Package cluster</h1>
+<!--
+	Copyright 2014 Ravindra Marella.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/marella/godb/cluster"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+				<dd><a href="#pkg-subdirectories">Subdirectories</a></dd>
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+Package cluster is a simple clustering library.
+It implements functions to create a cluster and send messages between peers.
+Currently it has no dependencies. A dummy zmq package is created by me in the zmq folder
+to use as a socket library in the cluster package.
+</p>
+<h3 id="hdr-Example">Example</h3>
+<p>
+First create a cluster using cluster.New() and then create a server using c.New().
+Use the package&#39;s c.Compose() method to create Envelopes.
+</p>
+<pre>package main
+import (
+	&#34;github.com/marella/godb/cluster&#34;
+
+	&#34;fmt&#34;
+)
+
+func main() {
+	c, _ := cluster.New(&#34;cluster&#34;)
+	c.Add(3, &#34;127.0.0.1:10003&#34;)
+	c.Update(3, &#34;127.0.0.1:10005&#34;)
+	c.Remove(3)
+
+	s1, _ := c.New(1)
+	s2, _ := c.New(2)
+
+	fmt.Println(&#34;Current cluster configuration:&#34;, c)
+
+	msg, _ := c.Compose(cluster.BROADCAST, &#34;hello there&#34;)
+	s1.Outbox() &lt;- msg
+	msg, _ = c.Compose(cluster.BROADCAST, &#34;yeah&#34;)
+	s2.Outbox() &lt;- msg
+
+	e := &lt;-s2.Inbox()
+	fmt.Printf(&#34;Received msg from %d: &#39;%s&#39; MsgId: %d\n&#34;, e.Pid, e.Msg, e.MsgId)
+	e = &lt;-s1.Inbox()
+	fmt.Printf(&#34;Received msg from %d: &#39;%s&#39; MsgId: %d\n&#34;, e.Pid, e.Msg, e.MsgId)
+}
+</pre>
+
+			</div>
+		</div>
+		
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+				<dd><a href="#pkg-constants">Constants</a></dd>
+			
+			
+			
+			
+				
+				<dd><a href="#Cluster">type Cluster</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#New">func New(name string) (c *Cluster, err error)</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.Add">func (c *Cluster) Add(pid int, addr string) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.Address">func (c *Cluster) Address(pid int) (addr string, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.AddressExists">func (c *Cluster) AddressExists(addr string) bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.Compose">func (c *Cluster) Compose(pid int, msg interface{}) (e *Envelope, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.Exists">func (c *Cluster) Exists(pid int) (ok bool)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.Load">func (c *Cluster) Load() (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.New">func (c *Cluster) New(pid int) (s Server, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.Remove">func (c *Cluster) Remove(pid int) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.Update">func (c *Cluster) Update(pid int, addr string) (err error)</a></dd>
+				
+			
+				
+				<dd><a href="#Counter">type Counter</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Counter.Count">func (c *Counter) Count() (x int64)</a></dd>
+				
+			
+				
+				<dd><a href="#Envelope">type Envelope</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#OpenEnvelope">func OpenEnvelope(buf []byte) (e *Envelope, err error)</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Envelope.Encode">func (e *Envelope) Encode() ([]byte, error)</a></dd>
+				
+			
+				
+				<dd><a href="#Peer">type Peer</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Peer.Inbox">func (p *Peer) Inbox() chan *Envelope</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Peer.Outbox">func (p *Peer) Outbox() chan *Envelope</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Peer.Peers">func (p *Peer) Peers() (peers []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Peer.Pid">func (p *Peer) Pid() int</a></dd>
+				
+			
+				
+				<dd><a href="#Server">type Server</a></dd>
+				
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="https://github.com/marella/godb/tree/master/cluster/cluster.go">cluster.go</a>
+			
+				<a href="https://github.com/marella/godb/tree/master/cluster/envelope.go">envelope.go</a>
+			
+				<a href="https://github.com/marella/godb/tree/master/cluster/server.go">server.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+			<h2 id="pkg-constants">Constants</h2>
+			
+				<pre>const (
+    <span id="BROADCAST">BROADCAST</span> = -1
+)</pre>
+				
+			
+		
+		
+		
+		
+			
+			
+			<h2 id="Cluster">type <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=1665:2077#L50">Cluster</a></h2>
+			<pre>type Cluster struct {
+    <span class="comment">// Map of pids and addresses of peers in the cluster</span>
+    Addresses map[<a href="/pkg/builtin/#string">string</a>]<a href="/pkg/builtin/#string">string</a>
+
+    <span class="comment">// Capacity or buffer size of the messaging channels of peers</span>
+    ChanCap <a href="/pkg/builtin/#int">int</a>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+A Cluster holds the configuration information like list of peer ids in the cluster, address map etc.
+Each cluster created should have a unique name and the settings are loaded from &lt;cluster_name&gt;.config file in the current directory.
+It also holds the MsgCounter that is added to all Envelopes sent in cluster as a MsgId.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+				
+				<h2 id="New">func <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=2238:2283#L66">New</a></h2>
+				<pre>func New(name <a href="/pkg/builtin/#string">string</a>) (c *<a href="#Cluster">Cluster</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Creates and loads the cluster configuration with the given name from &lt;cluster_name&gt;.config file in the current directory.
+Configuration is JSON encoded.
+</p>
+
+				
+			
+
+			
+				
+				<h2 id="Cluster.Add">func (*Cluster) <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=3781:3836#L132">Add</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) Add(pid <a href="/pkg/builtin/#int">int</a>, addr <a href="/pkg/builtin/#string">string</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Adds a new peer to the cluster configuration.
+Returns error if pid or addr already exist in the cluster.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Cluster.Address">func (*Cluster) <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=5671:5730#L207">Address</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) Address(pid <a href="/pkg/builtin/#int">int</a>) (addr <a href="/pkg/builtin/#string">string</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Returns the address of a given pid. Returns error if pid does not exist in the cluster.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Cluster.AddressExists">func (*Cluster) <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=5405:5454#L195">AddressExists</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) AddressExists(addr <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+				<p>
+Checks if a given addr exists in the cluster.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Cluster.Compose">func (*Cluster) <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=6033:6109#L220">Compose</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) Compose(pid <a href="/pkg/builtin/#int">int</a>, msg interface{}) (e *<a href="#Envelope">Envelope</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Composes a message into Envelope.
+Returns error if the given pid is not in the cluster.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Cluster.Exists">func (*Cluster) <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=5225:5268#L187">Exists</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) Exists(pid <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
+				<p>
+Checks if a given pid exists in the cluster.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Cluster.Load">func (*Cluster) <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=2527:2563#L77">Load</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) Load() (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Loads the cluster configuration from &lt;cluster_name&gt;.config file in the current directory.
+Configuration is JSON encoded.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Cluster.New">func (*Cluster) <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=3324:3376#L115">New</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) New(pid <a href="/pkg/builtin/#int">int</a>) (s <a href="#Server">Server</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Creates a new Peer that implements the Server interface
+</p>
+
+				
+				
+			
+				
+				<h2 id="Cluster.Remove">func (*Cluster) <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=4844:4889#L166">Remove</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) Remove(pid <a href="/pkg/builtin/#int">int</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Removes a peer from the cluster configuration.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Cluster.Update">func (*Cluster) <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=4372:4430#L150">Update</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) Update(pid <a href="/pkg/builtin/#int">int</a>, addr <a href="/pkg/builtin/#string">string</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Updates the address of a peer in the cluster configuration.
+Returns error if pid does not exist or addr already exists in the cluster.
+</p>
+
+				
+				
+			
+		
+			
+			
+			<h2 id="Counter">type <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=6409:6457#L230">Counter</a></h2>
+			<pre>type Counter struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+Thread safe counter to assign unquie MsgIds to Envelopes in a cluster.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+				<h2 id="Counter.Count">func (*Counter) <a href="https://github.com/marella/godb/tree/master/cluster/cluster.go?s=6545:6580#L237">Count</a></h2>
+				<pre>func (c *<a href="#Counter">Counter</a>) Count() (x <a href="/pkg/builtin/#int64">int64</a>)</pre>
+				<p>
+Increments and returns the Counter value.
+To be used as a MsgId of an Envelope.
+</p>
+
+				
+				
+			
+		
+			
+			
+			<h2 id="Envelope">type <a href="https://github.com/marella/godb/tree/master/cluster/envelope.go?s=143:661#L1">Envelope</a></h2>
+			<pre>type Envelope struct {
+    <span class="comment">// On the sender side, Pid identifies the receiving peer.</span>
+    <span class="comment">// If instead, Pid is set to cluster.BROADCAST, the message is sent to all peers.</span>
+    <span class="comment">// On the receiver side, the Id is always set to the original sender.</span>
+    <span class="comment">// If the Id is not found, the message is silently dropped.</span>
+    Pid <a href="/pkg/builtin/#int">int</a>
+
+    <span class="comment">// An id that globally and uniquely identifies the message, meant for duplicate detection at</span>
+    <span class="comment">// higher levels. It is opaque to this package.</span>
+    MsgId <a href="/pkg/builtin/#int64">int64</a>
+
+    <span class="comment">// The actual body of the message.</span>
+    Msg interface{}
+}</pre>
+			<p>
+An Envelope holds the receiver/sender id, a unique message id and the actual message.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+				
+				<h2 id="OpenEnvelope">func <a href="https://github.com/marella/godb/tree/master/cluster/envelope.go?s=991:1045#L28">OpenEnvelope</a></h2>
+				<pre>func OpenEnvelope(buf []<a href="/pkg/builtin/#byte">byte</a>) (e *<a href="#Envelope">Envelope</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Decodes byte array to Envelope.
+Used in recvMessage() of peer.
+</p>
+
+				
+			
+
+			
+				
+				<h2 id="Envelope.Encode">func (*Envelope) <a href="https://github.com/marella/godb/tree/master/cluster/envelope.go?s=730:773#L16">Encode</a></h2>
+				<pre>func (e *<a href="#Envelope">Envelope</a>) Encode() ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Encodes an Envelope to bytes.
+Used in sendMessage() of peer.
+</p>
+
+				
+				
+			
+		
+			
+			
+			<h2 id="Peer">type <a href="https://github.com/marella/godb/tree/master/cluster/server.go?s=473:588#L14">Peer</a></h2>
+			<pre>type Peer struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+Peer implements the Server interface.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+				<h2 id="Peer.Inbox">func (*Peer) <a href="https://github.com/marella/godb/tree/master/cluster/server.go?s=1017:1054#L43">Inbox</a></h2>
+				<pre>func (p *<a href="#Peer">Peer</a>) Inbox() chan *<a href="#Envelope">Envelope</a></pre>
+				<p>
+Channel to receive messages from other peers.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Peer.Outbox">func (*Peer) <a href="https://github.com/marella/godb/tree/master/cluster/server.go?s=907:945#L38">Outbox</a></h2>
+				<pre>func (p *<a href="#Peer">Peer</a>) Outbox() chan *<a href="#Envelope">Envelope</a></pre>
+				<p>
+Channel to send messages to other peers.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Peer.Peers">func (*Peer) <a href="https://github.com/marella/godb/tree/master/cluster/server.go?s=721:757#L28">Peers</a></h2>
+				<pre>func (p *<a href="#Peer">Peer</a>) Peers() (peers []<a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+Get list of Pids of other peers in the same cluster.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Peer.Pid">func (*Peer) <a href="https://github.com/marella/godb/tree/master/cluster/server.go?s=621:645#L23">Pid</a></h2>
+				<pre>func (p *<a href="#Peer">Peer</a>) Pid() <a href="/pkg/builtin/#int">int</a></pre>
+				<p>
+Get the Pid of this server.
+</p>
+
+				
+				
+			
+		
+			
+			
+			<h2 id="Server">type <a href="https://github.com/marella/godb/tree/master/cluster/server.go?s=156:430#L1">Server</a></h2>
+			<pre>type Server interface {
+    <span class="comment">// Id of this server.</span>
+    Pid() <a href="/pkg/builtin/#int">int</a>
+
+    <span class="comment">// List of Pids of other peers in the same cluster.</span>
+    Peers() []<a href="/pkg/builtin/#int">int</a>
+
+    <span class="comment">// Channel to send messages to other peers.</span>
+    Outbox() chan *<a href="#Envelope">Envelope</a>
+
+    <span class="comment">// Channel to receive messages from other peers.</span>
+    Inbox() chan *<a href="#Envelope">Envelope</a>
+}</pre>
+			<p>
+Interface to be implemented by a Peer in the Cluster.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+		
+	
+
+	
+
+
+
+
+
+	
+	
+		<h2 id="pkg-subdirectories">Subdirectories</h2>
+	
+	<table class="dir">
+	<tr>
+	<th>Name</th>
+	<th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+	<th style="text-align: left; width: auto">Synopsis</th>
+	</tr>
+	
+		<tr>
+		<td><a href="..">..</a></td>
+		</tr>
+	
+	
+		
+			<tr>
+			<td class="name"><a href="doc/">doc</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto"></td>
+			</tr>
+		
+	
+		
+			<tr>
+			<td class="name"><a href="examples/">examples</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto"></td>
+			</tr>
+		
+	
+		
+			<tr>
+			<td class="name"><a href="zmq/">zmq</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto"></td>
+			</tr>
+		
+	
+	</table>
+	
+
+
+
+
+</div>
+		</div>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script type="text/javascript" src="http://golang.org/lib/godoc/godocs.js"></script>
+	</body>
+</html>
