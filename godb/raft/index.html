@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>raft - Ravindra Marella</title>
+		<link type="text/css" rel="stylesheet" href="http://golang.org/lib/godoc/style.css">
+	</head>
+	<body>
+		<div id="page" class="wide">
+			<div class="container">
+				<h1>Package raft</h1>
+<!--
+	Copyright 2014 Ravindra Marella.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/marella/godb/raft"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+				<dd><a href="#pkg-subdirectories">Subdirectories</a></dd>
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+Package raft implements the Raft Leader Election algorithm in Ongaro, Diego, and John Ousterhout. &#34;In search of an understandable consensus algorithm.&#34; Draft of October 7 (2013).
+It uses the cluster package to send/receive messages.
+</p>
+<h3 id="hdr-Example">Example</h3>
+<p>
+First create a cluster c using raft.NewCluster() and then create a server using c.New().
+</p>
+<pre>package main
+
+import (
+	&#34;github.com/marella/godb/raft&#34;
+
+	&#34;fmt&#34;
+	&#34;time&#34;
+)
+
+func main() {
+	c, _ := raft.NewCluster(&#34;raft&#34;)
+	s1, _ := c.New(1)
+	s2, _ := c.New(2)
+	s3, _ := c.New(3)
+	s4, _ := c.New(4)
+	s5, _ := c.New(5)
+	s1.SetTerm(0)
+	s2.SetTerm(0)
+	s3.SetTerm(0)
+	s4.SetTerm(0)
+	s5.SetTerm(0)
+
+	fmt.Println(&#34;Current cluster configuration:&#34;, c)
+
+	for {
+		if s1.IsLeader() {
+			fmt.Println(&#34;Leader: s1&#34;)
+		}
+		if s2.IsLeader() {
+			fmt.Println(&#34;Leader: s2&#34;)
+		}
+		if s3.IsLeader() {
+			fmt.Println(&#34;Leader: s3&#34;)
+		}
+		if s4.IsLeader() {
+			fmt.Println(&#34;Leader: s4&#34;)
+		}
+		if s5.IsLeader() {
+			fmt.Println(&#34;Leader: s5&#34;)
+		}
+		fmt.Println(s1.Term(), s2.Term(), s3.Term(), s4.Term(), s5.Term())
+		time.Sleep(2 * time.Second)
+	}
+}
+</pre>
+
+			</div>
+		</div>
+		
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+			
+			
+				
+				<dd><a href="#Cluster">type Cluster</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#NewCluster">func NewCluster(name string) (c *Cluster, err error)</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.Load">func (c *Cluster) Load() (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.New">func (c *Cluster) New(pid int) (r Raft, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.Save">func (c *Cluster) Save() (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Cluster.Term">func (c *Cluster) Term(pid int) (term int, err error)</a></dd>
+				
+			
+				
+				<dd><a href="#Raft">type Raft</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Server">type Server</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Server.IsLeader">func (s *Server) IsLeader() bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Server.SetTerm">func (s *Server) SetTerm(term int) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Server.Term">func (s *Server) Term() (term int)</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/godoc/target/raft.go">raft.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+		
+		
+		
+			
+			
+			<h2 id="Cluster">type <a href="/godoc/target/raft.go?s=1639:1909#L69">Cluster</a></h2>
+			<pre>type Cluster struct {
+    Terms map[<a href="/pkg/builtin/#string">string</a>]<a href="/pkg/builtin/#string">string</a>
+
+    HeartBeatRate   <a href="/pkg/time/">time</a>.<a href="/pkg/time/#Duration">Duration</a>
+    ElectionWaitMin <a href="/pkg/builtin/#int">int</a>
+    ElectionWaitMax <a href="/pkg/builtin/#int">int</a>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+This is an extension of the Cluster in cluster package.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+				
+				<h2 id="NewCluster">func <a href="/godoc/target/raft.go?s=2105:2157#L84">NewCluster</a></h2>
+				<pre>func NewCluster(name <a href="/pkg/builtin/#string">string</a>) (c *<a href="#Cluster">Cluster</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Creates and loads the cluster configuration with the given name from &lt;cluster_name&gt;.config and &lt;cluster_name.cluster.config&gt; files in the current directory.
+Configuration is JSON encoded.
+</p>
+
+				
+			
+
+			
+				
+				<h2 id="Cluster.Load">func (*Cluster) <a href="/godoc/target/raft.go?s=2543:2579#L101">Load</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) Load() (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Loads the cluster configuration (Terms and Timeouts) from &lt;cluster_name&gt;.config file in the current directory.
+Configuration is JSON encoded.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Cluster.New">func (*Cluster) <a href="/godoc/target/raft.go?s=3325:3375#L137">New</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) New(pid <a href="/pkg/builtin/#int">int</a>) (r <a href="#Raft">Raft</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Creates a new Server that implements the Raft interface.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Cluster.Save">func (*Cluster) <a href="/godoc/target/raft.go?s=3138:3174#L128">Save</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) Save() (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Saves the current cluster configuration (Terms and Timeouts) to &lt;cluster_name&gt;.config file in the current directory.
+Configuration is JSON encoded.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Cluster.Term">func (*Cluster) <a href="/godoc/target/raft.go?s=3541:3594#L147">Term</a></h2>
+				<pre>func (c *<a href="#Cluster">Cluster</a>) Term(pid <a href="/pkg/builtin/#int">int</a>) (term <a href="/pkg/builtin/#int">int</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Get the Term of the server with given pid in the cluster.
+</p>
+
+				
+				
+			
+		
+			
+			
+			<h2 id="Raft">type <a href="/godoc/target/raft.go?s=1488:1578#L60">Raft</a></h2>
+			<pre>type Raft interface {
+    Term() <a href="/pkg/builtin/#int">int</a>
+
+    IsLeader() <a href="/pkg/builtin/#bool">bool</a>
+    SetTerm(<a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#error">error</a>
+    <span class="comment">// contains filtered or unexported methods</span>
+}</pre>
+			<p>
+Interface to be implemented by a Server in the Cluster.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Server">type <a href="/godoc/target/raft.go?s=3878:3974#L162">Server</a></h2>
+			<pre>type Server struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+Server implements the Raft interface.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+				<h2 id="Server.IsLeader">func (*Server) <a href="/godoc/target/raft.go?s=4578:4610#L198">IsLeader</a></h2>
+				<pre>func (s *<a href="#Server">Server</a>) IsLeader() <a href="/pkg/builtin/#bool">bool</a></pre>
+				<p>
+Check if the server is a leader.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Server.SetTerm">func (*Server) <a href="/godoc/target/raft.go?s=4109:4155#L176">SetTerm</a></h2>
+				<pre>func (s *<a href="#Server">Server</a>) SetTerm(term <a href="/pkg/builtin/#int">int</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Set the Term of server.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Server.Term">func (*Server) <a href="/godoc/target/raft.go?s=4003:4037#L170">Term</a></h2>
+				<pre>func (s *<a href="#Server">Server</a>) Term() (term <a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+Get the Term of server.
+</p>
+
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+	
+	
+		<h2 id="pkg-subdirectories">Subdirectories</h2>
+	
+	<table class="dir">
+	<tr>
+	<th>Name</th>
+	<th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+	<th style="text-align: left; width: auto">Synopsis</th>
+	</tr>
+	
+		<tr>
+		<td><a href="..">..</a></td>
+		</tr>
+	
+	
+		
+			<tr>
+			<td class="name"><a href="doc/">doc</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto"></td>
+			</tr>
+		
+	
+		
+			<tr>
+			<td class="name"><a href="examples/">examples</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto"></td>
+			</tr>
+		
+	
+	</table>
+	
+
+
+
+
+</div>
+		</div>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script type="text/javascript" src="http://golang.org/lib/godoc/godocs.js"></script>
+	</body>
+</html>
