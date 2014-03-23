@@ -50,47 +50,28 @@ It uses the cluster package to send/receive messages.
 First create a cluster c using raft.NewCluster() and then create a server using c.New().
 </p>
 <pre>package main
-
 import (
 	&#34;github.com/marella/godb/raft&#34;
 
 	&#34;fmt&#34;
-	&#34;time&#34;
 )
 
 func main() {
 	c, _ := raft.NewCluster(&#34;raft&#34;)
-	s1, _ := c.New(1)
-	s2, _ := c.New(2)
-	s3, _ := c.New(3)
-	s4, _ := c.New(4)
-	s5, _ := c.New(5)
-	s1.SetTerm(0)
-	s2.SetTerm(0)
-	s3.SetTerm(0)
-	s4.SetTerm(0)
-	s5.SetTerm(0)
 
-	fmt.Println(&#34;Current cluster configuration:&#34;, c)
+	s := []Raft{}
+	var temp Raft
+	for j := 0; j &lt; 5; j++ {
+		temp, _ = c.New(j+1)
+		s = append(s, temp)
+		s[j].SetTerm(0)
+	}
 
-	for {
-		if s1.IsLeader() {
-			fmt.Println(&#34;Leader: s1&#34;)
+	for j := 0; j &lt; 5; j++ {
+		if s[j].isLeader() {
+			s[j].Inbox() &lt;- &#34;LOG&#34;
+			fmt.Println(&lt;-s[j].Outbox())
 		}
-		if s2.IsLeader() {
-			fmt.Println(&#34;Leader: s2&#34;)
-		}
-		if s3.IsLeader() {
-			fmt.Println(&#34;Leader: s3&#34;)
-		}
-		if s4.IsLeader() {
-			fmt.Println(&#34;Leader: s4&#34;)
-		}
-		if s5.IsLeader() {
-			fmt.Println(&#34;Leader: s5&#34;)
-		}
-		fmt.Println(s1.Term(), s2.Term(), s3.Term(), s4.Term(), s5.Term())
-		time.Sleep(2 * time.Second)
 	}
 }
 </pre>
@@ -134,6 +115,11 @@ func main() {
 				
 			
 				
+				<dd><a href="#LogEntry">type LogEntry</a></dd>
+				
+				
+			
+				
 				<dd><a href="#Raft">type Raft</a></dd>
 				
 				
@@ -143,7 +129,19 @@ func main() {
 				
 				
 					
+					<dd>&nbsp; &nbsp; <a href="#Server.DiscardUpto">func (s *Server) DiscardUpto(index int64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Server.Inbox">func (s *Server) Inbox() chan&lt;- interface{}</a></dd>
+				
+					
 					<dd>&nbsp; &nbsp; <a href="#Server.IsLeader">func (s *Server) IsLeader() bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Server.Leader">func (s *Server) Leader() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Server.Outbox">func (s *Server) Outbox() &lt;-chan interface{}</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Server.SetTerm">func (s *Server) SetTerm(term int) (err error)</a></dd>
@@ -177,7 +175,7 @@ func main() {
 		
 			
 			
-			<h2 id="Cluster">type <a href="/godoc/target/raft.go?s=1639:1909#L69">Cluster</a></h2>
+			<h2 id="Cluster">type <a href="/godoc/target/raft.go?s=1910:2180#L74">Cluster</a></h2>
 			<pre>type Cluster struct {
     Terms map[<a href="/pkg/builtin/#string">string</a>]<a href="/pkg/builtin/#string">string</a>
 
@@ -199,7 +197,7 @@ This is an extension of the Cluster in cluster package.
 
 			
 				
-				<h2 id="NewCluster">func <a href="/godoc/target/raft.go?s=2105:2157#L84">NewCluster</a></h2>
+				<h2 id="NewCluster">func <a href="/godoc/target/raft.go?s=2376:2428#L89">NewCluster</a></h2>
 				<pre>func NewCluster(name <a href="/pkg/builtin/#string">string</a>) (c *<a href="#Cluster">Cluster</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Creates and loads the cluster configuration with the given name from &lt;cluster_name&gt;.config and &lt;cluster_name.cluster.config&gt; files in the current directory.
@@ -211,7 +209,7 @@ Configuration is JSON encoded.
 
 			
 				
-				<h2 id="Cluster.Load">func (*Cluster) <a href="/godoc/target/raft.go?s=2543:2579#L101">Load</a></h2>
+				<h2 id="Cluster.Load">func (*Cluster) <a href="/godoc/target/raft.go?s=2814:2850#L106">Load</a></h2>
 				<pre>func (c *<a href="#Cluster">Cluster</a>) Load() (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Loads the cluster configuration (Terms and Timeouts) from &lt;cluster_name&gt;.config file in the current directory.
@@ -222,7 +220,7 @@ Configuration is JSON encoded.
 				
 			
 				
-				<h2 id="Cluster.New">func (*Cluster) <a href="/godoc/target/raft.go?s=3325:3375#L137">New</a></h2>
+				<h2 id="Cluster.New">func (*Cluster) <a href="/godoc/target/raft.go?s=3596:3646#L142">New</a></h2>
 				<pre>func (c *<a href="#Cluster">Cluster</a>) New(pid <a href="/pkg/builtin/#int">int</a>) (r <a href="#Raft">Raft</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Creates a new Server that implements the Raft interface.
@@ -232,7 +230,7 @@ Creates a new Server that implements the Raft interface.
 				
 			
 				
-				<h2 id="Cluster.Save">func (*Cluster) <a href="/godoc/target/raft.go?s=3138:3174#L128">Save</a></h2>
+				<h2 id="Cluster.Save">func (*Cluster) <a href="/godoc/target/raft.go?s=3409:3445#L133">Save</a></h2>
 				<pre>func (c *<a href="#Cluster">Cluster</a>) Save() (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Saves the current cluster configuration (Terms and Timeouts) to &lt;cluster_name&gt;.config file in the current directory.
@@ -243,7 +241,7 @@ Configuration is JSON encoded.
 				
 			
 				
-				<h2 id="Cluster.Term">func (*Cluster) <a href="/godoc/target/raft.go?s=3541:3594#L147">Term</a></h2>
+				<h2 id="Cluster.Term">func (*Cluster) <a href="/godoc/target/raft.go?s=3990:4043#L157">Term</a></h2>
 				<pre>func (c *<a href="#Cluster">Cluster</a>) Term(pid <a href="/pkg/builtin/#int">int</a>) (term <a href="/pkg/builtin/#int">int</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Get the Term of the server with given pid in the cluster.
@@ -255,12 +253,52 @@ Get the Term of the server with given pid in the cluster.
 		
 			
 			
-			<h2 id="Raft">type <a href="/godoc/target/raft.go?s=1488:1578#L60">Raft</a></h2>
+			<h2 id="LogEntry">type <a href="/godoc/target/raft.go?s=1686:1849#L63">LogEntry</a></h2>
+			<pre>type LogEntry struct {
+    <span class="comment">// An index into an abstract 2^64 size array</span>
+    Index <a href="/pkg/builtin/#int64">int64</a>
+
+    <span class="comment">// The data that was supplied to raft&#39;s inbox</span>
+    Data interface{}
+
+    Commit <a href="/pkg/builtin/#bool">bool</a>
+}</pre>
+			<p>
+Identifies an entry in the log
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Raft">type <a href="/godoc/target/raft.go?s=1040:1650#L41">Raft</a></h2>
 			<pre>type Raft interface {
     Term() <a href="/pkg/builtin/#int">int</a>
 
     IsLeader() <a href="/pkg/builtin/#bool">bool</a>
+    Leader() <a href="/pkg/builtin/#int">int</a>
     SetTerm(<a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#error">error</a>
+    <span class="comment">// Mailbox for state machine layer above to send commands of any</span>
+    <span class="comment">// kind, and to have them replicated by raft.  If the server is not</span>
+    <span class="comment">// the leader, an error message with the current leader Pid is returned</span>
+    Inbox() chan&lt;- interface{}
+
+    <span class="comment">//Mailbox for state machine layer above to receive commands. These</span>
+    <span class="comment">//are guaranteed to have been replicated on a majority</span>
+    Outbox() &lt;-chan interface{}
+
+    <span class="comment">//Remove items with index less than given index (inclusive),</span>
+    <span class="comment">//and reclaim disk space.</span>
+    DiscardUpto(index <a href="/pkg/builtin/#int64">int64</a>)
     <span class="comment">// contains filtered or unexported methods</span>
 }</pre>
 			<p>
@@ -280,8 +318,11 @@ Interface to be implemented by a Server in the Cluster.
 		
 			
 			
-			<h2 id="Server">type <a href="/godoc/target/raft.go?s=3878:3974#L162">Server</a></h2>
+			<h2 id="Server">type <a href="/godoc/target/raft.go?s=4327:4550#L172">Server</a></h2>
 			<pre>type Server struct {
+
+    <span class="comment">// Store the log here</span>
+    Log map[<a href="/pkg/builtin/#string">string</a>]<a href="#LogEntry">LogEntry</a>
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre>
 			<p>
@@ -299,7 +340,30 @@ Server implements the Raft interface.
 
 			
 				
-				<h2 id="Server.IsLeader">func (*Server) <a href="/godoc/target/raft.go?s=4578:4610#L198">IsLeader</a></h2>
+				<h2 id="Server.DiscardUpto">func (*Server) <a href="/godoc/target/raft.go?s=5098:5139#L200">DiscardUpto</a></h2>
+				<pre>func (s *<a href="#Server">Server</a>) DiscardUpto(index <a href="/pkg/builtin/#int64">int64</a>)</pre>
+				<p>
+Remove items with index less than given index (inclusive),
+and reclaim disk space.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Server.Inbox">func (*Server) <a href="/godoc/target/raft.go?s=4757:4800#L188">Inbox</a></h2>
+				<pre>func (s *<a href="#Server">Server</a>) Inbox() chan&lt;- interface{}</pre>
+				<p>
+Mailbox for state machine layer above to send commands of any
+kind, and to have them replicated by raft.  If the server is not
+the leader, an error message with the current leader Pid is returned
+</p>
+
+				
+				
+			
+				
+				<h2 id="Server.IsLeader">func (*Server) <a href="/godoc/target/raft.go?s=5909:5941#L240">IsLeader</a></h2>
 				<pre>func (s *<a href="#Server">Server</a>) IsLeader() <a href="/pkg/builtin/#bool">bool</a></pre>
 				<p>
 Check if the server is a leader.
@@ -309,7 +373,28 @@ Check if the server is a leader.
 				
 			
 				
-				<h2 id="Server.SetTerm">func (*Server) <a href="/godoc/target/raft.go?s=4109:4155#L176">SetTerm</a></h2>
+				<h2 id="Server.Leader">func (*Server) <a href="/godoc/target/raft.go?s=5991:6020#L245">Leader</a></h2>
+				<pre>func (s *<a href="#Server">Server</a>) Leader() <a href="/pkg/builtin/#int">int</a></pre>
+				<p>
+Get the leader Pid.
+</p>
+
+				
+				
+			
+				
+				<h2 id="Server.Outbox">func (*Server) <a href="/godoc/target/raft.go?s=4944:4988#L194">Outbox</a></h2>
+				<pre>func (s *<a href="#Server">Server</a>) Outbox() &lt;-chan interface{}</pre>
+				<p>
+Mailbox for state machine layer above to receive commands. These
+are guaranteed to have been replicated on a majority
+</p>
+
+				
+				
+			
+				
+				<h2 id="Server.SetTerm">func (*Server) <a href="/godoc/target/raft.go?s=5440:5486#L218">SetTerm</a></h2>
 				<pre>func (s *<a href="#Server">Server</a>) SetTerm(term <a href="/pkg/builtin/#int">int</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Set the Term of server.
@@ -319,7 +404,7 @@ Set the Term of server.
 				
 			
 				
-				<h2 id="Server.Term">func (*Server) <a href="/godoc/target/raft.go?s=4003:4037#L170">Term</a></h2>
+				<h2 id="Server.Term">func (*Server) <a href="/godoc/target/raft.go?s=5334:5368#L212">Term</a></h2>
 				<pre>func (s *<a href="#Server">Server</a>) Term() (term <a href="/pkg/builtin/#int">int</a>)</pre>
 				<p>
 Get the Term of server.
@@ -364,6 +449,14 @@ Get the Term of server.
 		
 			<tr>
 			<td class="name"><a href="examples/">examples</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto"></td>
+			</tr>
+		
+	
+		
+			<tr>
+			<td class="name"><a href="log/">log</a></td>
 			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 			<td style="width: auto"></td>
 			</tr>
